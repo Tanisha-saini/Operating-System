@@ -1,0 +1,50 @@
+%%writefile question1.cpp
+#include<iostream>
+#include<stdio.h>
+#include<unistd.h>
+#include<sys/types.h>
+#include<sys/wait.h>
+using namespace std;
+int main(int argc,char *argv[])
+{
+    pid_t pid;
+    int n=atoi(argv[1]);                                            //taking n as input from command line
+    if(n<=0)                                                        //if n is negative 
+    {
+        cout<<"Number can not be negative";
+        exit(0);
+    }
+    pid= fork();                                                    //fork system call to create a child process
+
+    if (pid==0)                                                 
+    {
+        cout<<"\nInside Child process\n";
+        cout<<n<<"  ";
+        while (n!=1)
+        {
+            if (n%2==0)                                             //when n is even
+            {
+                n=n/2;
+            }
+            else                                                    //when n is odd
+            {
+               n=3*(n)+1;
+            }
+            cout<<n<<"  ";
+        }
+    }
+    else                                                
+    { 
+        wait(NULL);                                                 //parent waits for child to complete
+        cout<<"\nParent process completed";
+    }
+    
+    return 0;
+}
+
+
+
+//run
+%%script bash
+g++ question1.cpp -o question1
+./question1  -5
