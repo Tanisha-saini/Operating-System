@@ -1,0 +1,330 @@
+%%writefile sudokuvalidator.cpp
+#include<iostream>
+#include <pthread.h>
+#include<unistd.h>
+#include <stdio.h>
+#include<sys/types.h>
+using namespace std;
+
+bool flag=0;
+int subgrid[9],sumofrow,sumofcol;
+int sudoku[9][9]={
+        {6, 2, 4, 5, 3, 9, 1, 8, 7},
+        {5, 1, 9, 7, 2, 8, 6, 3, 4},
+        {8, 3, 7, 6, 1, 4, 2, 9, 5},
+        {1, 4, 3, 8, 6, 5, 7, 2, 9},
+        {9, 5, 8, 2, 4, 7, 3, 6, 1},
+        {7, 6, 2, 3, 9, 1, 4, 5, 8},
+        {3, 7, 1, 9, 5, 6, 8, 4, 2},
+        {4, 9, 6, 1, 8, 2, 5, 7, 3},
+        {2, 8, 5, 4, 7, 3, 9, 1, 6}};
+
+void *row(void *param);
+void *column(void *param);
+void *validatesubgrid1(void *param);
+void *validatesubgrid2(void *param);
+void *validatesubgrid3(void *param);
+void *validatesubgrid4(void *param);
+void *validatesubgrid5(void *param);
+void *validatesubgrid6(void *param);
+void *validatesubgrid7(void *param);
+void *validatesubgrid8(void *param);
+void *validatesubgrid9(void *param); 
+
+int main(int argc,char *argv[])
+{
+    for(int i=0;i<9;i++)
+    {
+        for(int j=0;j<9;j++)
+        {
+            if(sudoku[i][j]<1 || sudoku[i][j]>9)                                        //checking if there is any element other than 1 to 9
+            {
+                cout<<"Sudoku invaid (includes value < 0 or value > 9)";
+                exit(0);
+            }
+        }
+    }
+    
+    pthread_t tid1,tid2,tid3,tid4,tid5,tid6,tid7,tid8,tid9,tid10,tid11;                   /*thread identifier */
+    pthread_attr_t attr;                                                                  /*set of thread attributes*/
+    
+    pthread_attr_init(&attr);
+ 
+    pthread_create(&tid1,&attr,row,NULL);                                                 //thread to check if rows are valid
+    pthread_join(tid1,NULL);
+    pthread_create(&tid2,&attr,column,NULL);                                              //thread to check if columns are valid 
+    pthread_join(tid2,NULL);
+    pthread_create(&tid3,&attr,validatesubgrid1,NULL);                                     //thread to check if all 9 subgrids are valid
+    pthread_create(&tid4,&attr,validatesubgrid2,NULL);
+    pthread_create(&tid5,&attr,validatesubgrid3,NULL);
+    pthread_create(&tid6,&attr,validatesubgrid4,NULL);
+    pthread_create(&tid7,&attr,validatesubgrid5,NULL);
+    pthread_create(&tid8,&attr,validatesubgrid6,NULL);
+    pthread_create(&tid9,&attr,validatesubgrid7,NULL);
+    pthread_create(&tid10,&attr,validatesubgrid8,NULL);
+    pthread_create(&tid11,&attr,validatesubgrid9,NULL);
+    
+    pthread_join(tid3,NULL);
+    pthread_join(tid4,NULL);
+    pthread_join(tid5,NULL);
+    pthread_join(tid6,NULL);
+    pthread_join(tid7,NULL);
+    pthread_join(tid8,NULL);
+    pthread_join(tid9,NULL);
+    pthread_join(tid10,NULL);
+    pthread_join(tid11,NULL);
+
+    if (flag==1)
+    {
+        cout<<"Sudoku is Invalid";
+    }
+    else
+    {
+        cout<<"Sudoku is valid";
+    }
+    return 0;
+}
+ 
+void *row(void *param)                                                                //function to check if all the numbers in the row are different 
+{
+    for(int i=0;i<9;i++)
+    {
+        for(int k=i;k==i;k++)                                                         //checking for ith roww
+        {
+            sumofrow=0;
+            for(int j=0;j<9;j++)  
+            {
+                sumofrow=sumofrow+sudoku[i][j];                                       //adding all the elements of ith row 
+            }
+        }
+        if(sumofrow!=45)
+        {
+            flag=1;
+            break;
+        }
+    }
+}
+
+void *column(void *param)                                                         //function to check if all the numbers in the column are different
+{
+    for(int j=0;j<9;j++)                                                          
+    {
+        for(int k=j;k==j;k++)                                                     //checking jth column
+        {
+            sumofcol=0;
+            for(int i=0;i<9;i++)
+            {
+                sumofcol=sumofcol+sudoku[i][j];                                   //adding all the elements of jth columns
+            }
+        }
+        if(sumofcol!=45)
+        {
+            flag=1;
+            break;
+        }
+    }
+}
+//function to check if all the subgrids have all 9 digits(1-
+void *validatesubgrid1(void *param)                                                
+{
+    int k=0;
+    for(int i=0;i<3;i++)
+    {
+        for(int j=0;j<3;j++)
+        {
+            subgrid[k++]=sudoku[i][j];
+        }
+    }
+    for(int i=0; i<9; i++)
+    {
+      for(int j=i+1;j<9;j++)
+      {
+          if(subgrid[i]==subgrid[j])
+          {
+              flag=1;
+              break;
+          }
+      }
+   }
+}
+void *validatesubgrid2(void *param)                                                
+{
+    int k=0;
+    for(int i=0;i<3;i++)
+    {
+        for(int j=3;j<6;j++)
+        {
+            subgrid[k++]=sudoku[i][j];
+        }
+    }
+    for(int i=0; i<9; i++)
+    {
+      for(int j=i+1;j<9;j++)
+      {
+          if(subgrid[i]==subgrid[j])
+          {
+              flag=1;
+              break;
+          }
+      }
+   }
+}
+void *validatesubgrid3(void *param)                                                
+{
+    int k=0;
+    for(int i=0;i<3;i++)
+    {
+        for(int j=6;j<9;j++)
+        {
+            subgrid[k++]=sudoku[i][j];
+        }
+    }
+    for(int i=0; i<9; i++)
+    {
+      for(int j=i+1;j<9;j++)
+      {
+          if(subgrid[i]==subgrid[j])
+          {
+              flag=1;
+              break;
+          }
+      }
+   }
+}
+void *validatesubgrid4(void *param)                                                
+{
+    int k=0;
+    for(int i=3;i<6;i++)
+    {
+        for(int j=0;j<3;j++)
+        {
+            subgrid[k++]=sudoku[i][j];
+        }
+    }
+    for(int i=0; i<9; i++)
+    {
+      for(int j=i+1;j<9;j++)
+      {
+          if(subgrid[i]==subgrid[j])
+          {
+              flag=1;
+              break;
+          }
+      }
+   }
+}
+void *validatesubgrid5(void *param)                                                
+{
+    int k=0;
+    for(int i=3;i<6;i++)
+    {
+        for(int j=3;j<6;j++)
+        {
+            subgrid[k++]=sudoku[i][j];
+        }
+    }
+    for(int i=0; i<9; i++)
+    {
+      for(int j=i+1;j<9;j++)
+      {
+          if(subgrid[i]==subgrid[j])
+          {
+              flag=1;
+              break;
+          }
+      }
+   }
+}
+void *validatesubgrid6(void *param)                                                
+{
+    int k=0;
+    for(int i=3;i<6;i++)
+    {
+        for(int j=6;j<9;j++)
+        {
+            subgrid[k++]=sudoku[i][j];
+        }
+    }
+    for(int i=0; i<9; i++)
+    {
+      for(int j=i+1;j<9;j++)
+      {
+          if(subgrid[i]==subgrid[j])
+          {
+              flag=1;
+              break;
+          }
+      }
+   }
+}
+void *validatesubgrid7(void *param)                                                
+{
+    int k=0;
+    for(int i=6;i<9;i++)
+    {
+        for(int j=0;j<3;j++)
+        {
+            subgrid[k++]=sudoku[i][j];
+        }
+    }
+    for(int i=0; i<9; i++)
+    {
+      for(int j=i+1;j<9;j++)
+      {
+          if(subgrid[i]==subgrid[j])
+          {
+              flag=1;
+              break;
+          }
+      }
+   }
+}
+void *validatesubgrid8(void *param)                                                
+{
+    int k=0;
+    for(int i=6;i<9;i++)
+    {
+        for(int j=3;j<6;j++)
+        {
+            subgrid[k++]=sudoku[i][j];
+        }
+    }
+    for(int i=0; i<9; i++)
+    {
+      for(int j=i+1;j<9;j++)
+      {
+          if(subgrid[i]==subgrid[j])
+          {
+              flag=1;
+              break;
+          }
+      }
+   }
+}
+void *validatesubgrid9(void *param)                                                
+{
+    int k=0;
+    for(int i=6;i<9;i++)
+    {
+        for(int j=6;j<9;j++)
+        {
+            subgrid[k++]=sudoku[i][j];
+        }
+    }
+    for(int i=0; i<9; i++)
+    {
+      for(int j=i+1;j<9;j++)
+      {
+          if(subgrid[i]==subgrid[j])
+          {
+              flag=1;
+              break;
+          }
+      }
+   }
+}
+
+//Run
+%%script bash 
+g++ -pthread sudokuvalidator.cpp -o sudokuvalidator
+./sudokuvalidator
