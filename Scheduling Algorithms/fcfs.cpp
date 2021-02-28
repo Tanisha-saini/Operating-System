@@ -1,5 +1,3 @@
-//Done by:-Tanisha saini 5052
-
 #include<iostream>
 using namespace std;
 
